@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: JwtValidator-Service
+  config:
+    activate:
+      on-profile: prod
+  messages:
+    basename: messages
+    encoding: UTF-8
+server:
+  port: 9050
+    
+jwt:
+  secret: 5367566B5970337336762342342342341139792F4123F452811482B4D6251655468576D5A71347437
+
+otel:
+  service:
+    name: "auth-service"
+  traces:
+    exporter: "otlp"
+    sampler: "always_on"
+  metrics:
+    exporter: "otlp"
+    export:
+      interval: 5000
+  logs:
+    exporter: "otlp"
+  exporter:
+    otlp:
+      protocol: "grpc"
+      endpoint: "http://localhost:4317"
