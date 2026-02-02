@@ -8,11 +8,11 @@
         <version>3.5.10</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ru.stroy1click.jwt</groupId>
-    <artifactId>Stroy1Click-JwtValidatorService</artifactId>
+    <groupId>ru.stroy1click</groupId>
+    <artifactId>jwt-validator-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Stroy1Click - JwtValidatorService</name>
-    <description>Stroy1Click - JwtValidatorService</description>
+    <name>JwtValidatorService</name>
+    <description>Сервис для проверки JWT токена</description>
     <url/>
     <licenses>
         <license/>

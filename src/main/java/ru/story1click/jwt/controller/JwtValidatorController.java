@@ -21,43 +21,63 @@ public class JwtValidatorController {
     @GetMapping("/validate")
     public ResponseEntity<Void> validateJwt(@RequestHeader(value = "Authorization", required = false) String jwt,
                                             @RequestHeader(value = "X-Original-URL", required = false) String rawUri,
-                                            @RequestHeader(value = "X-Original-Method", required = false) String rawMethod){
+                                            @RequestHeader(value = "X-Original-Method", required = false) String rawMethod) {
+
         String originalUri = getCleanHeader(rawUri);
         String originalMethod = getCleanHeader(rawMethod);
 
-        System.out.println("Jwt" + jwt);
-        System.out.println("X-Original-URL" + originalUri);
-        System.out.println("X-Original-Method" + originalMethod);
-
-        if (originalMethod == null || originalUri == null) {
+        if (areHeadersMissing(originalMethod, originalUri)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if(originalMethod.equalsIgnoreCase("OPTIONS")){ //CORS
+        if(isPreflightRequest(originalMethod)){
             return ResponseEntity.noContent().build();
         }
 
-        if (originalUri.equals("/api/v1/auth/login") || originalUri.equals("/api/v1/auth/registration")
-                || originalUri.equals("/api/v1/product-attribute-assignments/filter") ||
-                originalUri.startsWith("/api/v1/confirmation-codes")) {
+        if (isPublicAccessAllowed(originalMethod, originalUri)) {
             return ResponseEntity.ok().build();
         }
 
-        if (originalMethod.equalsIgnoreCase("GET")
-                && !originalUri.startsWith("/api/v1/users")
-                && !originalUri.startsWith("/api/v1/orders")) {
-            return ResponseEntity.ok().build();
-        }
-
-        if (jwt == null || !jwt.startsWith("Bearer ")) {
+        if (!isBearerTokenPresent(jwt)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if(!this.jwtService.validate(jwt.substring(7), originalUri)){
+        String token = jwt.substring(0, 7);
+
+        if (!this.jwtService.validate(token, originalUri)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    private boolean areHeadersMissing(String method, String uri) {
+        return method == null || uri == null;
+    }
+
+    private boolean isBearerTokenPresent(String jwt) {
+        return jwt != null && jwt.startsWith("Bearer ");
+    }
+
+    private boolean isPublicAccessAllowed(String method, String uri) {
+        return isWhitelistedEndpoint(uri) || isAllowedGetRequest(method, uri);
+    }
+
+    private boolean isPreflightRequest(String method) {
+        return "OPTIONS".equalsIgnoreCase(method);
+    }
+
+    private boolean isWhitelistedEndpoint(String uri) {
+        return uri.equals("/api/v1/auth/login")
+                || uri.equals("/api/v1/auth/registration")
+                || uri.equals("/api/v1/product-attribute-assignments/filter")
+                || uri.startsWith("/api/v1/confirmation-codes");
+    }
+
+    private boolean isAllowedGetRequest(String method, String uri) {
+        return "GET".equalsIgnoreCase(method)
+                && !uri.startsWith("/api/v1/users")
+                && !uri.startsWith("/api/v1/orders");
     }
 
     private String getCleanHeader(String header) {
