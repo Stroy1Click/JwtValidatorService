@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.story1click.jwt.service.JwtService;
+import ru.story1click.jwt.service.JwtValidationService;
 
 @RestController
 @RequestMapping("/api/v1/jwt")
@@ -16,7 +16,7 @@ import ru.story1click.jwt.service.JwtService;
 @Tag(name = "JwtValidator Controller", description = "Проверка JWT для Ingress")
 public class JwtValidatorController {
 
-    private final JwtService jwtService;
+    private final JwtValidationService jwtValidationService;
 
     @GetMapping("/validate")
     public ResponseEntity<Void> validateJwt(@RequestHeader(value = "Authorization", required = false) String jwt,
@@ -42,9 +42,9 @@ public class JwtValidatorController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String token = jwt.substring(0, 7);
+        String token = jwt.substring(7);
 
-        if (!this.jwtService.validate(token, originalUri)) {
+        if (!this.jwtValidationService.validate(token, originalUri)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

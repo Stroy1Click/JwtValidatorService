@@ -17,7 +17,7 @@ jwt:
 
 otel:
   service:
-    name: "auth-service"
+    name: "jwt-validator-service"
   traces:
     exporter: "otlp"
     sampler: "always_on"
