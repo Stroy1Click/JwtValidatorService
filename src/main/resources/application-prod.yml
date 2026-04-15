@@ -7,6 +7,9 @@ spring:
   messages:
     basename: messages
     encoding: UTF-8
+  threads:
+    virtual:
+      enabled: true
 server:
   port: 9050
     
